@@ -1,6 +1,6 @@
 #include "bitmaps.h"
 
-// Define sprite(s)
+
 const UINT16 invader_bitmap[INVADER_HEIGHT] = {
     0x0000, 0x0810, 0x0810, 0x0420,
     0x0240, 0x1FF8, 0x2004, 0x4662,

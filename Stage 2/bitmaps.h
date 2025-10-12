@@ -3,7 +3,6 @@
 
 #include "constant.h"
 
-// Declare sprite(s)
 extern const UINT16 invader_bitmap[INVADER_HEIGHT];
 
 #endif
