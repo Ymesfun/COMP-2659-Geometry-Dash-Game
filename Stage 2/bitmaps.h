@@ -4,5 +4,7 @@
 #include "constant.h"
 
 extern const UINT16 invader_bitmap[SPRITE16_HEIGHT];
-
+extern const unsigned long square[];
+extern const unsigned long ground_spike[];
+extern const unsigned long ground_block[];
 #endif
