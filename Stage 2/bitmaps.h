@@ -3,6 +3,6 @@
 
 #include "constant.h"
 
-extern const UINT16 invader_bitmap[INVADER_HEIGHT];
+extern const UINT16 invader_bitmap[SPRITE16_HEIGHT];
 
 #endif

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "raster.C": "cpp",
+        "TST_RAST.C": "cpp",
+        "MAIN.C": "cpp"
+    }
+}

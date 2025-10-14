@@ -8,9 +8,8 @@
 #define COL_SIZE 16     
 
 
-#define INVADER_WIDTH 16
-#define INVADER_HEIGHT 16
-
+#define SPRITE16_HEIGHT 16
+#define SPRITE32_HEIGHT 32
 
 typedef unsigned int UINT16;   
 
