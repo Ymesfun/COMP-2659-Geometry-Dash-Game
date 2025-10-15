@@ -4,7 +4,7 @@
 void plot_bitmap_16(UINT16 *base, int row, int col, const UINT16 *bitmap) {
     int i = 0;
     for (i = 0; i < SPRITE16_HEIGHT; i++) {
-        int offset = ((row+i)<<word_bitshift) + ((row+i)<<3); //word shift = 5 
+        int offset = ((row+i)<<word_leftshift) + ((row+i)<<word_rightshift); //leftshift+rightshift = mult by 80 
         UINT16 *tempbase = base + offset + col;
         *tempbase |= bitmap[i];
     }
@@ -13,7 +13,7 @@ void plot_bitmap_16(UINT16 *base, int row, int col, const UINT16 *bitmap) {
 void plot_bitmap_32(unsigned long *base, int row, int col, const unsigned long *bitmap) {
     int i = 0;
     for (i = 0; i <  SPRITE32_HEIGHT; i++) {
-       int offset = ((row+i)<<long_bitshift) + ((row+i)<<2); //long shift = 4
+       int offset = ((row+i)<<long_leftshift) + ((row+i)<<long_rightshift); //left+right shift = mult by 40
         unsigned long *tempbase = base + offset + col;
         *tempbase |= bitmap[i];
     }
@@ -32,7 +32,7 @@ void screen_region_clear_16(int y_cord, int x_cord) {
     UINT16 *base = ( UINT16 *)Physbase();
     int i = 0;
     for (i = 0; i < SPRITE16_HEIGHT;  i++) {
-        int offset = ((y_cord+i)<<5) + ((y_cord+i)<<3);
+        int offset = ((y_cord+i)<<word_leftshift) + ((y_cord+i)<<word_rightshift);
         UINT16 *row = base + offset + x_cord;
         *row = 0x0000;   
     }
@@ -42,7 +42,7 @@ void screen_region_clear_32(int y_cord, int x_cord) {
     unsigned long *base = ( unsigned long *)Physbase();
     int i = 0;
     for (i = 0; i < SPRITE32_HEIGHT;  i++) {
-        int offset = ((y_cord+i)<<4) + ((y_cord+i)<<2);
+        int offset = ((y_cord+i)<<long_leftshift) + ((y_cord+i)<<long_rightshift);
         unsigned long *row = base + offset + x_cord;
         *row = 0x00000000;   
     }
@@ -50,7 +50,7 @@ void screen_region_clear_32(int y_cord, int x_cord) {
 
 void drawline(int start, int end, int y) {
     UINT16 *base = (UINT16 *)Physbase();
-    int offset = (y<<5) + (y<<3);  
+    int offset = (y<<word_leftshift) + (y<<word_rightshift);  
     int i = 0;
     if (end <= start) return;
     for (i = start; i < end; i++) {

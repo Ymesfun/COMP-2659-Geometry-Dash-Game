@@ -3,8 +3,10 @@
 
 #include "constant.h"
 
-#define word_bitshift 5
-#define long_bitshift 4
+#define word_leftshift 6
+#define word_rightshift 4
+#define long_leftshift 5
+#define long_rightshift 3
 #define screensize_long 8000
 
 void plot_bitmap_16(UINT16 *base, int row, int col, const UINT16 *bitmap);
