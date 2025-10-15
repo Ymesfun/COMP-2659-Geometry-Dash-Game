@@ -4,7 +4,7 @@
 void plot_bitmap_16(UINT16 *base, int row, int col, const UINT16 *bitmap) {
     int i = 0;
     for (i = 0; i < SPRITE16_HEIGHT; i++) {
-        int offset = ((row+i)<<5) + ((row+i)<<3);
+        int offset = ((row+i)<<word_bitshift) + ((row+i)<<3); //word shift = 5 
         UINT16 *tempbase = base + offset + col;
         *tempbase |= bitmap[i];
     }
@@ -13,7 +13,7 @@ void plot_bitmap_16(UINT16 *base, int row, int col, const UINT16 *bitmap) {
 void plot_bitmap_32(unsigned long *base, int row, int col, const unsigned long *bitmap) {
     int i = 0;
     for (i = 0; i <  SPRITE32_HEIGHT; i++) {
-       int offset = ((row+i)<<4) + ((row+i)<<2); 
+       int offset = ((row+i)<<long_bitshift) + ((row+i)<<2); //long shift = 4
         unsigned long *tempbase = base + offset + col;
         *tempbase |= bitmap[i];
     }
@@ -22,7 +22,7 @@ void clear_screen() {
    
     unsigned long *base = (unsigned long *)Physbase();
     int i = 0;
-    for (i = 0; i < 8000; i++) {
+    for (i = 0; i < screensize_long; i++) { //screensize_long is screensize, = 8000
         base[i] = 0x00000000;   
     }
 }
