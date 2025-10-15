@@ -10,6 +10,9 @@ typedef int bool;
 /* The idea is that our player cube has an x and y coordinate,
  and a length and width (fixed 16x16) which defines the square the player exists in.
  hriz_spd is its horizontal speed, and vcal_spd is the vertical, or jump speed.
+
+ ADENDUM: 0,0 is the top left of the frame buffer. This means a positive y is downward, and a negative y
+ goes upward. Keep this in mind before messing with the player cube's y pos!
 */
 typedef struct 
 {
@@ -39,7 +42,20 @@ typedef struct
     int x, y, length, width, col_x, col_y;
 } Goal_Zone;
 
+typedef struct 
+{
+    Player player;
+    Spike spikes[2];  //two spike objects we circulate around the stage?
+    Block block[2]; //Two block objects we circulate aroudn the stage?
+} Model; //meant to be a world model, needs work/updating as we go along
 
+// Model function logic below
+void move_player(Player p);
+bool in_bounds(Player p);
+bool wall_collision(Player p, Block b);
+bool spike_collision(Player p, Spike s);
+bool goal(Player p, Goal_Zone g);
+int player_jump(Player p, char length);
 
 
 

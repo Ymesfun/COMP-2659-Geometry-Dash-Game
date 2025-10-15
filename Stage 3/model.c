@@ -1,15 +1,16 @@
 #include "model.h"
 /*
-This is a simple function designed to update the players vertical and horizontal speed
+Purpose: This is a simple function designed to update the players vertical and horizontal speed
 if the player decides to jump, while horizontal speed is a constant velocity rate. 
-It will try to keep the player in boudns if there is an issue.
+It will try to keep the player in bounds if there is an issue.
 */
 void move_player(Player p){
     p.x += p.hriz_spd;
     p.y += p.vcal_spd;
     if(p.vcal_spd!= 0){
+        p.vcal_spd+= 10;
         if(!in_bounds(p)){
-            p.y = min_y;
+            p.y = min_y; //bounds checking that floors the minimum y position to the floor.
         };
     }
 }
@@ -18,7 +19,7 @@ Purpose: Checking if the player is in bounds very quickly. May need to add more 
 */
 bool in_bounds(Player p)
 {
-    if (p.y<min_y)
+    if (p.y>min_y)
     {
         return false;
     }
@@ -30,15 +31,16 @@ Purpose: This detects a wall collision and returns true or false based on if it 
 The logic of this function is simple. Check if our max x value is greater than a block, 
 but our base x value is less than the block. Then check if our height is greater than the full height of the wall.
 If the if statement gets a true in all 3, we have a wall collision. Otherwise return false.
+TODO: May be out of the scope of the wall collision check, but you should be able to stand on them.
 */
 bool wall_collision(Player p, Block b){
-    if(p.x+p.length>b.x &&p.x<b.x+b.width && && p.y<b.y){
+    if(p.x+p.length>b.x &&p.x<b.x+b.width && p.y>b.y+b.length){
         return true;
     }
     return false;
 }
 bool spike_collision(Player p, Spike s){
-    if(p.x+p.length>s.x && p.x<s.x+s.width && p.y<s.y+s.length ){
+    if(p.x+p.length>s.x && p.x<s.x+s.width && p.y>s.y+s.length){
         return true;
     }
     return false;
@@ -50,8 +52,25 @@ means we're either inside or past it, but checks if our base x is less than or e
 see if we arent past it. If this returns a true, game ends. If it returns a false, keep playing
 */
 bool goal(Player p, Goal_Zone g){
-    if(p.x+p.width>g.x && p.x<=g.x && p.y+p.length>g.y && p.y<g.y+g.col_y){
+    if(p.x+p.width>g.x && p.x<=g.x && p.y+p.length<g.y && p.y<g.y+g.col_y){ //if this doesnt feel good, fix
         return true;
     }
     return false;
+}
+/*
+Author: Yacob Mesfun
+Purpose: Jump, with a contrlled level of jump strength. basically, player can inject velocity 
+into their character for up to 3 model updates. This gets decayed in the move loop above.
+Max allowed jump time = 3 model updates, so 30 hriz_spd is max. 
+TODO: Prevent infinite airtime by handling jumping in the air either in the jump func or when it's
+called by hitting the jump key
+*/
+int player_jump(Player p, char length){
+    if(length<3){
+        p.hriz_spd -= 10;
+        length -= 1;
+        return length;
+    }
+    return 0;
+
 }
