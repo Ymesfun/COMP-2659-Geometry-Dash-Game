@@ -2,8 +2,6 @@
     "files.associations": {
         "raster.C": "cpp",
         "TST_RAST.C": "cpp",
-        "constant.h": "c",
-        "BITMAP (1).C": "cpp",
-        "model.h": "c"
+        "MAIN.C": "cpp"
     }
 }

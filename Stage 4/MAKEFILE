@@ -1,0 +1,17 @@
+test_rend: model.o raster.o bitmaps.o render.o rndtst.o
+	cc68x -g model.o raster.o bitmaps.o render.o rndtst.o -o test_rnd
+
+rndtst.o: rndtst.c rndtst.h
+	cc68x -g -c rndtst.c
+
+render.o: render.c render.h
+	cc68x -g -c render.c
+
+bitmaps.o:	bitmaps.c bitmaps.h
+	cc68x -g -c bitmaps.c
+
+raster.o: raster.c raster.h
+	cc68x -g -c raster.c
+
+model.o: model.c model.h
+	cc68x -g -c model.c

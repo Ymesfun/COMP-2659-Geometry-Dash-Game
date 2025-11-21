@@ -1,0 +1,11 @@
+tstmdl: model.o events.o mdltst.o
+	cc68x -g model.o events.o mdltst.o -o tstmdl
+
+mdltst.o: mdltst.c mdltst.h
+	cc68x -g -c mdltst.c
+
+events.o: events.c events.h
+	cc68x -g -c events.c
+
+model.o:  model.c model.h
+	cc68x -g -c model.c

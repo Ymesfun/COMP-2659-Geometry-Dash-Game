@@ -1,5 +1,5 @@
 /*******************************************************************************
- AUTHORS: Yacob Mesfun, Lorenzo Primiterra
+ AUTHORS: Yaccob Mesfun, Lorenzo Primiterra
  COURSE: COMP2659-002
  INSTRUCTOR: Steve Kalmar
  DATE: October 15, 2025

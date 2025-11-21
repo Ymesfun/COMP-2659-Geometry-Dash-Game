@@ -1,0 +1,24 @@
+geo_dash: raster.o events.o model.o render.o bitmaps.o input.o GeoDash.o
+	cc68x -g raster.o events.o model.o render.o bitmaps.o input.o GeoDash.o -o geo_dash
+
+GeoDash.o: GeoDash.c GeoDash.h
+	cc68x -g -c GeoDash.c
+
+input.o: input.c input.h
+	cc68x -g -c input.c
+
+raster.o: raster.c raster.h
+	cc68x -g -c raster.c
+
+events.o: events.c events.h
+	cc68x -g -c events.c
+
+model.o: model.c model.h
+	cc68x -g -c model.c
+
+render.o: render.c render.h
+	cc68x -g -c render.c 
+
+bitmaps.o: bitmaps.c bitmaps.h
+	cc68x -g -c bitmaps.c 
+

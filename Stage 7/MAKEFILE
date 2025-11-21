@@ -1,0 +1,20 @@
+music: tstmsc
+psg: tstpsg
+
+tstpsg: tstpsg.o psg.o
+	cc68x -g tstpsg.o psg.o
+
+tstpsg: tstpsg.c
+	cc68x -g -c tstpsg.c
+
+psg: psg.c psg.h
+	cc68x -g -c psg.c
+
+tstmsc: tstmsc.o music.o psg.o 
+	cc68x -g tstmsc.o music.o psg.o
+
+tstsmsc: tstmsc.c
+	cc68x -g -c tstmsc.c 
+
+music: music.c music.h
+	cc68x -g -c music.c 

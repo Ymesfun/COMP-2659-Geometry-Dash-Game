@@ -1,0 +1,8 @@
+tst_rast: bitmaps.o raster.o tst_rast.o
+	cc68x -g bitmaps.o raster.o tst_rast.o -o tst_rast
+bitmaps.o: bitmaps.c bitmaps.h
+	cc68x -g -c bitmaps.c
+raster.o: raster.c raster.h
+	cc68x -g -c raster.c
+tst_rast.o: tst_rast.c bitmaps.h
+	cc68x -g -c tst_rast.c
