@@ -8,10 +8,10 @@
 #define const int speed 2
 #define GRAVITY 2
 #define JUMP_SPEED -20
-#define num_spikes 2
-#define num_blocks 2
-#define num_hanging_spikes 1
-#define num_platforms 1
+#define NUM_SPIKES 20
+#define NUM_BLOCKS 20
+#define NUM_HANGING_SPIKES 1
+#define NUM_PLATFORMS 1
 
 typedef enum {
   COLLISION_NONE,
@@ -22,11 +22,13 @@ typedef enum {
 
 typedef struct {
   CollisionType collision;
-  int x, y;
+  int x, y, prev_x, prev_y,bbufx,bbufy;
   int width, height;
   int dx, dy;
+  bool render;
   bool eventflag;
   bool respawn;
+  bool movestate;
 } GameObject;
 
 typedef enum {
@@ -38,24 +40,25 @@ typedef enum {
 } PlayerState;
 
 typedef struct {
-GameObject entity;
-PlayerState state;
-int player_state;
-int jump_multiplier;
-bool alive;
-bool jump_pressed;
-bool on_ground;
-bool on_platform;
-unsigned int deathcount;
+  GameObject entity;
+  PlayerState state;
+  int player_state;
+  int jump_multiplier;
+  bool alive;
+  bool jump_pressed;
+  bool on_ground;
+  bool on_platform;
+  bool goal;
+  unsigned int deathcount;
 } Player;
 
 typedef struct{
   Player Player;
-  GameObject Spikes[num_spikes];
+  GameObject Spikes[NUM_SPIKES];
   int Spikecount;
-  GameObject Blocks[num_blocks];
-  GameObject HangingSpike[num_hanging_spikes];
-  GameObject platforms[num_platforms];
+  GameObject Blocks[NUM_BLOCKS];
+  GameObject HangingSpike[NUM_HANGING_SPIKES];
+  GameObject platforms[NUM_PLATFORMS];
   int Platformcount;
   int Hangingspikecount;
   int Blockcount;  
@@ -85,7 +88,10 @@ void object_move(GameObject *object);
 bool within_bounds(GameObject *object);
 void fall(Player *player);
 void player_jump(Player *player);
-void player_move(Player *player);
 void player_on_floor(Player *player, int height);
+bool prev_bounded(int x, int y);
+bool platform_top_collision(Player *player, GameObject *plat);
+bool platform_side_collision(Player *player, GameObject *plat);
+bool handle_platform_collisions(Player *player, GameObject *blocks, int count);
 
 #endif

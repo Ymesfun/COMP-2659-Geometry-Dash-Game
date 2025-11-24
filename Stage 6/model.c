@@ -12,6 +12,18 @@
 #include "model.h"
 #include "constant.h"
 
+/* Small helper func for collision*/
+bool aabb_overlap(GameObject *a, GameObject *b){
+    return (
+        a->x < b->x + b->width  &&
+        a->x + a->width  > b->x &&
+        a->y < b->y + b->height &&
+        a->y + a->height > b->y
+    );
+}
+
+
+
 /*******************************************************************************
     PURPOSE: Initializes a GameObject into being a spike.
     INPUT:   - GameObject *Object: Referring to the Object that should be initialized as a spike
@@ -31,7 +43,15 @@ void initialize_spike_gameobj(GameObject *Object, int x, int y, int Speed){
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
+        Object->render = true;
+    }else{
+        Object->render = false;
+    }
+    Object->movestate = true;
+
 }
+
 /*******************************************************************************
     PURPOSE: Initializes a GameObject into being a hanging spike.
     INPUT:   - GameObject *Object: Referring to the Object that should be initialized as a spike
@@ -52,6 +72,15 @@ void initialize_hanging_spike_gameobj(GameObject *Object, int x, int y, int Spee
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
+        Object->render = true;
+    }else{
+        Object->render = false;
+    }
+
+    Object->movestate = true;
+
+
 }
 /*******************************************************************************
     PURPOSE: Initializes a GameObject into being a block.
@@ -71,6 +100,14 @@ void initialize_block_gameobj(GameObject *Object, int x, int y, int Speed){
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
+        Object->render = true;
+    }else{
+        Object->render = false;
+    }
+    Object->movestate = true;
+
+
 }
 
 /*******************************************************************************
@@ -91,7 +128,16 @@ void initialize_platform_gameobj(GameObject *Object, int x, int y, int Speed){
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
+        Object->render = true;
+    }else{
+        Object->render = false;
+    }
+    Object->movestate = true;
+
+
 }
+
 /*******************************************************************************
     PURPOSE: Initializes a GameObject into being a goal.
     INPUT:   - GameObject *Object: Referring to the Object that should be initialized as a goal
@@ -110,6 +156,12 @@ void initialize_goal_gameobj(GameObject *Object, int x, int y, int Speed){
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
+        Object->render = true;
+    }else{
+        Object->render = false;
+    }
+    Object->movestate = true;
 }
 
 /*******************************************************************************
@@ -130,14 +182,20 @@ void initialize_player_gameobj(GameObject *Object, int x, int y, int Speed){
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
+        Object->render = true;
+    }else{
+        Object->render = false;
+    }
+    Object->movestate = true;
 }
 
 void initialize_player_obj(Player *PlayerObj, int x, int y, int Speed){
     initialize_player_gameobj(&PlayerObj->entity, x, y, Speed);
-    PlayerObj->player_state = STATE_IDLE;
+    PlayerObj->goal = false;
+    PlayerObj->player_state = STATE_MOVING;
     PlayerObj->jump_multiplier = 1;
     PlayerObj->alive = true;
-    PlayerObj->jump_pressed = 0;
     PlayerObj->on_ground = true;
     PlayerObj->on_platform = false;
     PlayerObj->jump_pressed = false;
@@ -151,11 +209,8 @@ void initialize_player_obj(Player *PlayerObj, int x, int y, int Speed){
     OUTPUT:  - returns true if the player is on the floor, false otherwise
 *******************************************************************************/
     bool on_ground(Player *player){
-     if (player->entity.y+player->entity.height >= FLOOR){
-            return true;
-    }
-        return false;
-    }
+        return(player->entity.y >= FLOOR);
+}
 
 
 
@@ -167,6 +222,13 @@ void initialize_player_obj(Player *PlayerObj, int x, int y, int Speed){
              - object: pointer to the GameObject to check collision against
     OUTPUT:  - N/A (calls player_death if collision occurs)
 *******************************************************************************/
+bool platform_side_collision(Player *player, GameObject *plat){
+    if (aabb_overlap(&player->entity, plat)) {
+        player_death(player);
+        return true;
+    }
+    return false;
+}
 bool platform_collision(Player *player, GameObject *object){
     int px = player->entity.x;
     int py = player->entity.y;
@@ -188,46 +250,52 @@ bool platform_collision(Player *player, GameObject *object){
     return false;
 }
 
+bool handle_platform_collisions(Player *player, GameObject *blocks, int count){
+    int i;
+    player->on_platform = false;
 
+    for (i = 0; i < count; i++){
+        GameObject *plat = &blocks[i];
 
-/*******************************************************************************
-    PURPOSE: Checks if the player is standing on top of a platform object.
-             This is determined by overlap in the x-axis and the player's bottom
-             aligning with the object's top.
-    INPUT:   - player: pointer to the Player object
-             - object: pointer to the GameObject to check against
-    OUTPUT:  - returns true if the player is on the platform, false otherwise
-*******************************************************************************/
-bool player_on_platform(Player *player, GameObject *object) {
+        if (!plat->render) continue;
+
+        if (platform_top_collision(player, plat)) {
+            return true;    
+        }
+        if (platform_side_collision(player, plat)) {
+            return true;    
+        }
+    }
+    return false;
+}
+
+bool platform_top_collision(Player *player, GameObject *plat){
     int px = player->entity.x;
     int py = player->entity.y;
     int pw = player->entity.width;
     int ph = player->entity.height;
-    int ox = object->x;
-    int oy = object->y;
-    int ow = object->width;
+    int ox = plat->x;
+    int oy = plat->y;
+    int ow = plat->width;
 
-    bool overlap_x = (px < ox + ow) && (px + pw > ox);
+    int bottom = py + ph;
+    int top = oy;
 
-    
-    bool crossing_top = (player->entity.dy > 0) && 
-                        (py + ph <= oy) && 
-                        (py + ph + player->entity.dy >= oy);
+    bool x_overlap = (px < ox + ow) && (px + pw > ox);
+    bool falling   = player->entity.dy > 0;
 
-    if (overlap_x && crossing_top) {
-     
-        player->entity.y = oy - ph;
+    bool crossing_top =
+        (bottom <= top) &&
+        (bottom + player->entity.dy >= top);
+
+    if (x_overlap && falling && crossing_top){
+        player->entity.y = top - ph;
         player->entity.dy = 0;
         player->on_platform = true;
-        player_on_floor(player, oy - ph);
         return true;
     }
-
-    player->on_platform = false;
     return false;
 }
-
-
 
 /*******************************************************************************
 	PURPOSE: Handles player death by marking the player as not alive, incrementing
@@ -237,9 +305,9 @@ bool player_on_platform(Player *player, GameObject *object) {
 *******************************************************************************/
 void player_death(Player *player){
 
-player->alive = false; 
-player->deathcount += 1;
-player->state = STATE_DEAD;
+    player->alive = false; 
+    player->deathcount += 1;
+    player->state = STATE_DEAD;
 
 }
 
@@ -251,15 +319,13 @@ player->state = STATE_DEAD;
     OUTPUT:  - N/A (updates player state and position directly)
 *******************************************************************************/
 void player_idle(Player *player){
-/* defines player start before key press (frozen)
-- could just set state = STATE_IDLE and freeze movement until input changes it.
-*/
-player->entity.x = 100;
-player->entity.y = 100;
-player->alive = true;
-player->state = STATE_IDLE;
-player->entity.dx = 0;
-player->entity.dy = 0;
+    /* defines player start before key press (frozen)
+    - could just set state = STATE_IDLE and freeze movement until input changes it.
+    */
+    player->state = STATE_IDLE;
+    player->entity.dx = 0;
+    player->entity.dy = 0;
+
 }
 
 
@@ -315,10 +381,8 @@ bool object_collisioncheck (Player *player, GameObject *object){
 *******************************************************************************/
 void player_respawn (Player *player){
 
-player->entity.x = 100;
-player->entity.y = 100;
-player_idle(player);
-
+    player->entity.x = 100;
+    player->entity.y = 100;
 }
 
 
@@ -330,8 +394,8 @@ player_idle(player);
 *******************************************************************************/
 void object_idle(GameObject *object){
 
-object->dx = 0;
-object->dy = 0;
+    object->dx = 0;
+    object->dy = 0;
 
 }
 
@@ -345,10 +409,10 @@ object->dy = 0;
 *******************************************************************************/
 void portal(Player *player){
 /* a function that when collided with would trigger end game state */
-player->entity.dx = 0;
-player->entity.dy = 0;
-player->state = WIN_COLLISION;
-
+    player->entity.dx = 0;
+    player->entity.dy = 0;
+    player->state = WIN_COLLISION;
+    player->goal = true;
 }
 
 
@@ -363,10 +427,10 @@ player->state = WIN_COLLISION;
 *******************************************************************************/
 void object_respawn(GameObject *object, Player *player){
 /* would simply reset the object to a starting position as the level would not be randomized ?*/
-if (player->alive == true && within_bounds(object) == false){
-    object -> x = 640;
-    object -> y = 250;
-}
+    if (player->alive == true && within_bounds(object) == false){
+        object -> x = 640;
+        object -> y = 250;
+    }
 }
 
 
@@ -378,9 +442,14 @@ if (player->alive == true && within_bounds(object) == false){
     OUTPUT:  - N/A (updates object position directly)
 *******************************************************************************/
 void object_move(GameObject *object){
-
- object -> x -= (object -> dx);
- object -> y -= (object -> dy);
+    object->x -= (object->dx);
+    object->y -= (object->dy);
+    if(object->x <= 0){
+        object->render = false;
+        object->movestate = false;
+    }else if(object->x <= 608){
+        object->render = true;
+    }
 }
 
 
@@ -391,11 +460,11 @@ void object_move(GameObject *object){
     OUTPUT:  - returns true if the object is within bounds, false otherwise
 *******************************************************************************/
 bool within_bounds(GameObject *object){
-if (object->x >= 0 && object->x <= 640 &&
-    object->y >=0 && object->y <= 400){
+    if (object->x >= 0 && object->x <= 608 &&
+        object->y >=0 && object->y <= 368){
         return true;
     }
-return false;
+    return false;
 }
 
 /*******************************************************************************
@@ -404,22 +473,42 @@ return false;
     OUTPUT:  - modifies player's vertical velocity and position
 *******************************************************************************/
 void fall(Player *player){
-    if(on_ground(player)&& player->jump_pressed == false){
+    player->entity.y += player->entity.dy;
+    player->entity.dy += GRAVITY;
+
+    if (player->entity.y >= FLOOR){
+        player->entity.y = FLOOR;
+        player->entity.dy = 0;
+        player->on_ground = true;
+    } else {
+        player->on_ground = false;
+    }
+}
+/*
+void fall(Player *player){
+    if(on_ground(player)&& player->entity.dy>=0){
         player->entity.dy = 0;
         player->entity.y = FLOOR;
-    }else{
-        player->entity.dy += GRAVITY;
+        player->on_ground = true;
+    } else {
         player->entity.y += player->entity.dy;
+        player->entity.dy += GRAVITY;
+        player->on_ground = false;
+        if(on_ground(player)){
+            player->entity.dy = 0;
+            player->entity.y = FLOOR;
+            player->on_ground = true;
+
+        }
     }
-
 }
-
+*/
 void player_on_floor(Player *player, int height){
     player->entity.y = height;
     player->entity.dy = 0;
     player->on_ground = true;
-
 }
+
 /*******************************************************************************
     PURPOSE: Handles player jump logic based on ground or platform status.
     INPUT:   - player: pointer to the Player object
@@ -427,24 +516,15 @@ void player_on_floor(Player *player, int height){
     OUTPUT:  - updates player's vertical velocity and position
              - modifies ground/platform state flags
 *******************************************************************************/
-
 void player_jump(Player *player){
-    if (player->jump_pressed && on_ground(player)){
-        player->on_ground = false;
-        player->entity.dy = JUMP_SPEED;
-        player->entity.y += player->entity.dy; 
-        fall(player);
-    }else if (player->jump_pressed && player->on_platform){
-        player->on_platform = false; 
-        player->entity.dy = JUMP_SPEED;
-        player->entity.y += player->entity.dy; 
-        fall(player);
-    }else if (player->entity.y == FLOOR) {
-        player_on_floor(player, FLOOR);
+    if (player->jump_pressed){
+        if (player->on_ground || player->on_platform){
+            player->entity.dy = JUMP_SPEED;
+            player->on_ground = false;
+            player->on_platform = false;
+        }
     }
-    player->jump_pressed = false;
 }
-
 /*******************************************************************************
     PURPOSE: Moves the player horizontally and triggers jump logic if applicable.
     INPUT:   - player: pointer to the Player object
@@ -455,4 +535,8 @@ void player_jump(Player *player){
 void player_move(Player *player){
     player->entity.x += player->entity.dx;
     fall(player);
+}
+
+bool prev_bounded(int x, int y){ /*32+608=640, 32+368 = 400*/
+    return(x <= 608 && x >= 0 && y >= 0 && y <= 368 );
 }

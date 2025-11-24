@@ -20,11 +20,71 @@
     INPUT:   - Model: memory address of the Mode holding the game world/elements
     OUTPUT:  - N/A
 *******************************************************************************/
-void update_game_model(Model *Model){ 
+void update_game_model(Model *Model) { 
+    Player *player = &Model->Player;
+    int i;
+
+    if (handle_platform_collisions(player, Model->Blocks, Model->Blockcount)) {
+        if (!player->alive) return; 
+    }
+
+    for (i = 0; i < Model->Spikecount; i++) {
+        if (object_collisioncheck(player, &Model->Spikes[i])) {
+            player_death(player);
+            return;
+        }
+    }
+    /*Commented out to minimuze bugchcking needed
+
+    for (i = 0; i < Model->Hangingspikecount; i++) {
+        if (object_collisioncheck(player, &Model->HangingSpike[i])) {
+            player_death(player);
+            return;
+        }
+    }
+    for(i = 0; i< Model->Platformcount; i++){
+        if(platform_top_collision(player,&Model->platforms[i]))
+        {
+            continue;
+        }
+    }        
+        */
+    if (object_collisioncheck(player, &Model->Goal)) {
+        portal(player);
+        player_idle(player);
+        return;
+    }
+
+    player_move(player);
+
+    for (i = 0; i < Model->Spikecount; i++){
+        if(Model->Spikes[i].movestate){
+            object_move(&Model->Spikes[i]);
+        }
+    }
+
+    for (i = 0; i < Model->Blockcount; i++){
+        if(Model->Blocks[i].movestate){
+            object_move(&Model->Blocks[i]);
+        }
+    }
+    /* Commented out to minimize what we would need to bugfix
+    for (i = 0; i < Model->Platformcount; i++){
+        if(Model->platforms[i].movestate){
+            object_move(&Model->platforms[i]);
+        }
+    }
+        */
+    if(Model->Goal.movestate){
+        object_move(&Model->Goal);
+    }
+}
+
+/*void update_game_model(Model *Model){ 
     int i;
     i = i+i;
     for(i=0;i<Model->Blockcount;i++){
-        if(platform_collision(&Model->Player,&Model->Blocks[i]) == true){ /*should eventually not check unrendered objects*/
+        if(platform_collision(&Model->Player,&Model->Blocks[i]) == true){
             player_death(&Model->Player);
         } else{
             player_on_platform(&Model->Player,&Model->Blocks[i]); 
@@ -59,4 +119,4 @@ void update_game_model(Model *Model){
      
     object_move(&Model->Goal);
     }
-}
+}*/
