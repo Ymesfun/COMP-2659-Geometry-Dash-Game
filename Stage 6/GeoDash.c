@@ -20,6 +20,11 @@
 #include "GeoDash.h"
 #include "input.h"
 
+UINT32 get_time();
+void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT32* orig_buffer, UINT8 back_buffer_array[]);
+UINT8 allocated_buffer[32260];
+void initialize_first_stage(Model *model);
+void initialize_first_frame(Model *model);
 
 /*******************************************************************************
     PURPOSE: Main Render function that draws the screen
@@ -27,21 +32,16 @@
              - unsigned long *base, the pointer to the frame buffer
     OUTPUT:  - N/A
 *******************************************************************************/
-
-
-void initialize_first_frame(Model *model);
-void initialize_first_stage(Model *model);
-void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT32* orig_buffer, UINT8 back_buffer_array[]);
-
 int main() {
     bool user_quit;
-    Model model;   
-    UINT8 allocated_buffer[32260];
-    bool is_curr_buffer_front = true;
+    Model  model;   
+    bool curr_front = true; 
+    UINT8 game_state = 0;
+    UINT32 *back_buffer, *front_buffer;
+    UINT32* orig_buffer = Physbase();
     char ch = '\0'; 
     unsigned long time_then, time_now, time_elapsed;
-    UINT32 *back_buffer, *front_buffer;
-    UINT32* orig_buffer = (UINT32*)Physbase();
+    unsigned long * base = (unsigned long*)Physbase();
     user_quit = false;
    
 
@@ -50,46 +50,47 @@ int main() {
     set_buffers(&back_buffer, &front_buffer, orig_buffer, allocated_buffer);
 
     
-    while (!user_quit) {
+    while (!user_quit) { 
        ch = input_read();
         if (ch == JUMP_KEY) { /* spacebar*/
             model.Player.jump_pressed = true;
         }
-        time_now = get_time();
-        time_elapsed = time_now - time_then;
-
-        if ( time_elapsed > 1) {
+		
+		time_now = get_time();
+		time_elapsed = time_now - time_then;
+		
+		if (time_elapsed > 0) {
             if(model.Player.jump_pressed){
                 player_jump(&model.Player);
                 model.Player.jump_pressed = false;
             }
             update_game_model(&model);
-            render(&model, orig_buffer);
 
-            if(is_curr_buffer_front == true) {
+            time_then = time_now;	
+			if(curr_front == true) {
 				render(&model, back_buffer);
-				Setscreen(-1,(UINT32)back_buffer,-1);
-				is_curr_buffer_front = false;
-            }   
-			else {
+				Setscreen(-1,back_buffer,-1);
+				curr_front = false;
+			} else {
 				render(&model, front_buffer);
-				Setscreen(-1,(UINT32)front_buffer,-1);
-				is_curr_buffer_front = true;
+				Setscreen(-1,front_buffer,-1);
+				curr_front = true;
 			}
 				
-			Vsync();        
-
+			Vsync();              
             if (!model.Player.alive || model.Player.goal) {
                 break;
             }
-            time_then = time_now;
-        }
-    }
-    printf("Player status. jump = %d, jump dy = %d : Block Render Status: %d\n",model.Player.jump_pressed, model.Player.entity.dy,model.Blocks[0].render);
-    
-    Setscreen(-1, (UINT32)orig_buffer, -1);
+				
+		}
+		
+	}
+
+    Setscreen(-1, orig_buffer, -1);
+
     return 0;
 }
+
 
 /*******************************************************************************
     PURPOSE: Main Render function that draws the screen
@@ -110,26 +111,17 @@ unsigned long get_time(){
 
 }
 
-void initialize_first_stage(Model *model){
-    int i, x, y;
-    model->Blockcount = 2;
-    model->Spikecount = 2;
-    initialize_player_obj(&model->Player, 50, FLOOR,0);
-    for(i = 0; i<model->Spikecount; i++){
-        x = 180 + i * 180;       
-        y = FLOOR;              
-        initialize_spike_gameobj(&model->Spikes[i], x, y, 7);
-    }
-    for(i = 0; i<model->Blockcount; i++){
-        x = 212 + i * 180;       
-        y = FLOOR;              
-        initialize_block_gameobj(&model->Blocks[i], x, y, 7);
-    }
-        initialize_goal_gameobj(&model->Goal,700,FLOOR,7);
 
-}
-
-
+/*********************************************************
+ * Purpose: Initializes the back and front buffer pointers for double buffering
+ *
+ * Details: * The back buffer pointer is set to a 256-byte aligned address within the global back_buffer_array.
+ * 			 front buffer pointer is set to point to the original buffer
+ *
+ * Input:  Back buffer, front buffer and the original true buffer
+ * Output: Modifies the back buffer to point to a 256 byte aligned address in back_buffer_array and changes the address stored at front buffer to orig_buffer
+ *
+ *********************************************************/
 void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT32* orig_buffer, UINT8 back_buffer_array[]) {
 
     UINT32 address;
@@ -148,6 +140,25 @@ void set_buffers(UINT32** back_buffer, UINT32** front_buffer, UINT32* orig_buffe
     *front_buffer = orig_buffer;
 }
 
+
+void initialize_first_stage(Model *model){
+    int i, x, y;
+    model->Blockcount = 2;
+    model->Spikecount = 2;
+    initialize_player_obj(&model->Player, 50, FLOOR,0);
+    for(i = 0; i<model->Spikecount; i++){
+        x = 180 + i * 180;       
+        y = FLOOR;              
+        initialize_spike_gameobj(&model->Spikes[i], x, y, 7);
+    }
+    for(i = 0; i<model->Blockcount; i++){
+        x = 212 + i * 180;       
+        y = FLOOR;              
+        initialize_block_gameobj(&model->Blocks[i], x, y, 7);
+    }
+    initialize_goal_gameobj(&model->Goal,700,FLOOR,7);
+
+}
 
 void initialize_first_frame(Model *model){
     model->Spikecount = NUM_SPIKES;

@@ -11,81 +11,73 @@
 #include "render.h"
 #include "model.h"
 static int state = 0; /*Using state design seems best for this.*/
+static int ground = 0; /*Draw the ground twice*/
 
-
+/*******************************************************************************
+    PURPOSE: Main clear function that clears both buffers. A bit too aggressive,
+             defaulting to full clear for full submission.
+              - Model - memory address of our model
+    OUTPUT:  - N/A
+*******************************************************************************/
 void reg_clear(Model *model){
     int i;
     /* erase player */
-    screen_region_clear_32(model->Player.entity.prev_y, model->Player.entity.prev_x);
-    model->Player.entity.prev_x = model->Player.entity.x;
-    model->Player.entity.prev_y = model->Player.entity.y;
+    screen_region_clear_32(model->Player.entity.prev_y[state], model->Player.entity.prev_x[state]);
+    model->Player.entity.prev_x[state] = model->Player.entity.x;
+    model->Player.entity.prev_y[state] = model->Player.entity.y;
+
     /* erase blocks */
     for(i=0; i<model->Blockcount; i++){
-        if(prev_bounded(model->Blocks[i].prev_x,model->Blocks[i].prev_y)){
-            screen_region_clear_32(model->Blocks[i].prev_y, model->Blocks[i].prev_x);
+        if(!(model->Blocks[i].prev_x[state] == model->Blocks[i].x && model->Blocks[i].prev_y[state] == model->Blocks[i].y && model->Blocks[i].render == false)){
+            if(prev_bounded(model->Blocks[i].prev_x[state],model->Blocks[i].prev_y[state])){
+                screen_region_clear_32(model->Blocks[i].prev_y[state], model->Blocks[i].prev_x[state]);
+            }
+        model->Blocks[i].prev_x[state] = model->Blocks[i].x;
+        model->Blocks[i].prev_y[state] = model->Blocks[i].y;
         }
-        if(model->Blocks[i].movestate == true){
-            model->Blocks[i].prev_x = model->Blocks[i].x;
-            model->Blocks[i].prev_y = model->Blocks[i].y;
-        }        
     }
 
     /* erase spikes */
     for(i=0; i<model->Spikecount; i++){
-        if(prev_bounded(model->Spikes[i].prev_x,model->Spikes[i].prev_y)){
-            screen_region_clear_32(model->Spikes[i].prev_y, model->Spikes[i].prev_x);
+        if(!(model->Spikes[i].prev_x[state] == model->Spikes[i].x && model->Spikes[i].prev_y[state] == model->Spikes[i].y && model->Spikes[i].render == false)){
+            if(prev_bounded(model->Spikes[i].prev_x[state],model->Spikes[i].prev_y[state])){
+                screen_region_clear_32(model->Spikes[i].prev_y[state], model->Spikes[i].prev_x[state]);
+            }
+            model->Spikes[i].prev_x[state] = model->Spikes[i].x;
+            model->Spikes[i].prev_y[state] = model->Spikes[i].y;
         }
-        if(model->Spikes[i].movestate == true){
-            model->Spikes[i].prev_x = model->Spikes[i].x;
-            model->Spikes[i].prev_y = model->Spikes[i].y;
-        }  
     }
-    /* erase hanging spikes */
-    for(i=0; i<model->Hangingspikecount; i++){
-        if(prev_bounded(model->HangingSpike[i].prev_x,model->HangingSpike[i].prev_y)){
-            screen_region_clear_32(model->HangingSpike[i].prev_y, model->HangingSpike[i].prev_x);
+    if(!(model->Goal.prev_x[state] == model->Goal.x && model->Goal.prev_y[state] == model->Goal.y && model->Goal.render == false)){
+        if(prev_bounded(model->Goal.prev_x[state],model->Goal.prev_y[state])){
+            screen_region_clear_32(model->Goal.prev_y[state], model->Goal.prev_x[state]);
         }
-        if(model->HangingSpike[i].movestate == true){
-            model->HangingSpike[i].prev_x = model->HangingSpike[i].x;
-            model->HangingSpike[i].prev_y = model->HangingSpike[i].y;
-        }  
     }
-    /* erase platforms */
-    for(i=0; i<model->Platformcount; i++){
-        if(prev_bounded(model->platforms[i].prev_x,model->platforms[i].prev_y)){
-            screen_region_clear_32(model->platforms[i].prev_y, model->platforms[i].prev_x);
-        }
-        if(model->platforms[i].movestate == true){
-            model->platforms[i].prev_x = model->platforms[i].x;
-            model->platforms[i].prev_y = model->platforms[i].y;
-        }  
-    }
-    /* erase goal */
-    if(prev_bounded(model->Goal.prev_x,model->Goal.prev_y)){
-        screen_region_clear_32(model->Goal.prev_y, model->Goal.prev_x);
-    }
-    if(model->Goal.movestate == true){
-        model->Goal.prev_x = model->Goal.x;
-        model->Goal.prev_y = model->Goal.y;
-    }
+    model->Goal.prev_x[state] = model->Goal.x;
+    model->Goal.prev_y[state] = model->Goal.y;
+    state = (state+1)&1; /*Instead of (state+1)%2, we can just and to find if were at index 0/1*/
 }
 
 /*******************************************************************************
     PURPOSE: Main Render function that draws the screen
     INPUT:   - const Model *model, the model of the world
-              - unsigned long *base, the pointer to the frame buffer
+              - UINT32*base, the pointer to the frame buffer
     OUTPUT:  - N/A
 *******************************************************************************/
-void render(Model *model, unsigned long *base){ /* TODO - replace unsigned long base with UINT32 constant from constants.h*/
-    if(state == 0){
+void render(Model *model, UINT32 *base){
+    /* This partial clear would be better, but it clears so fast things are invisbile.
+    if(ground < 1){
         clear_screen();
     }else{
         reg_clear(model);
     }
-    if(state < 1){
-        drawline(0,640,GROUND_BASE); /*draw ground*/
-        state ++;
+    if(ground < ){
+        drawline(0,640,GROUND_BASE); 
+        ground ++;
     }
+    */
+    clear_screen();
+    drawline(0,640,GROUND_BASE);
+    /*Use partial clearing when it works better.*/
     render_player(&model->Player, base);
     render_spikes(model, base);
     render_blocks(model, base);
@@ -101,10 +93,10 @@ void render(Model *model, unsigned long *base){ /* TODO - replace unsigned long 
     /*******************************************************************************
         PURPOSE: Helper render function that draws the spikes
         INPUT:   - const Model *model, the model that holds the spikes array
-                - unsigned long *base, the pointer to the frame buffer
+                - UINT32*base, the pointer to the frame buffer
         OUTPUT:  - N/A
     *******************************************************************************/
-void render_spikes(Model *model, unsigned long *base){
+void render_spikes(Model *model, UINT32 *base){
     int i;
     for(i = 0; i<model->Spikecount; i++){
         /* example: check if spike in bounds here... e.g.*/
@@ -115,7 +107,7 @@ void render_spikes(Model *model, unsigned long *base){
     }
 }
 
-void render_hanging_spike(Model *model, unsigned long *base){
+void render_hanging_spike(Model *model, UINT32*base){
     int i;
     for(i = 0; i<model->Hangingspikecount; i++){
         /* example: check if spike in bounds here... e.g.*/
@@ -128,10 +120,10 @@ void render_hanging_spike(Model *model, unsigned long *base){
     /*******************************************************************************
         PURPOSE: Helper render function that draws the blocks
         INPUT:   - const Model *model, the model that holds the block array
-                - unsigned long *base, the pointer to the frame buffer
+                - UINT32*base, the pointer to the frame buffer
         OUTPUT:  - N/A
     *******************************************************************************/
-void render_blocks(Model *model, unsigned long *base){
+void render_blocks(Model *model, UINT32*base){
     int i = 0;
     for(i = 0; i<model->Blockcount; i++){
         /*read above in render_all_spikes*/
@@ -141,7 +133,7 @@ void render_blocks(Model *model, unsigned long *base){
     }
 }
     
-void render_platform(Model *model, unsigned long *base){
+void render_platform(Model *model, UINT32*base){
     int i = 0;
     for(i = 0; i<model->Platformcount; i++){
         /*read above in render_all_spikes*/
@@ -154,15 +146,15 @@ void render_platform(Model *model, unsigned long *base){
 /*******************************************************************************
     PURPOSE: Helper render function that draws the player
     INPUT:   - const Player *player, the player object
-            - unsigned long *base, the pointer to the frame buffer
+            - UINT32*base, the pointer to the frame buffer
     OUTPUT:  - N/A
 *******************************************************************************/
-void render_player(Player *player, unsigned long *base){
+void render_player(Player *player, UINT32*base){
         /*if(player->alive){*/
         plot_bitmap_32(base, player->entity.x, player->entity.y, square);
     }
 
-void render_goal(GameObject *object, unsigned long *base){
+void render_goal(GameObject *object, UINT32*base){
     plot_bitmap_32(base, object->x, object->y, portal_bitmap);
 }
 

@@ -22,7 +22,8 @@ typedef enum {
 
 typedef struct {
   CollisionType collision;
-  int x, y, prev_x, prev_y,bbufx,bbufy;
+  int x, y;
+  int prev_x[2], prev_y[2];
   int width, height;
   int dx, dy;
   bool render;
@@ -74,9 +75,7 @@ void initialize_hanging_spike_gameobj(GameObject *Object, int x, int y, int Spee
 void initialize_platform_gameobj(GameObject *Object, int x, int y, int Speed);
 
 bool on_ground(Player *player);
-bool platform_collision(Player *player, GameObject *object);
 void player_move(Player *player);
-bool player_on_platform(Player *player, GameObject *object);
 void player_death(Player *player);
 void player_idle(Player *player);
 bool object_collisioncheck (Player *player, GameObject *object);

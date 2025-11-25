@@ -62,11 +62,16 @@ void initialize_spike_gameobj(GameObject *Object, int x, int y, int Speed){
 *******************************************************************************/
 
 void initialize_hanging_spike_gameobj(GameObject *Object, int x, int y, int Speed){
+    int i;
     Object->collision =2;
     /*initialize visual model here*/
     Object->x = x;
     Object->y = y;
     Object->dx = Speed;
+    for(i = 0; i<2; i++){
+        Object->prev_x[i] = 0;
+        Object->prev_y[i] = 0;
+    }
     Object->dy = 0; /* non-player gameobjs really shouldnt be jumping or flying around.*/
     Object->width = 32;
     Object->height = 32;
@@ -91,9 +96,14 @@ void initialize_hanging_spike_gameobj(GameObject *Object, int x, int y, int Spee
     OUTPUT:  - N/A
 *******************************************************************************/
 void initialize_block_gameobj(GameObject *Object, int x, int y, int Speed){
+    int i;
     Object->collision = 2;
     Object->x = x;
     Object->y = y;
+    for(i = 0; i<2; i++){
+        Object->prev_x[i] = 0;
+        Object->prev_y[i] = 0;
+    }
     Object->dx = Speed;
     Object->dy = 0; /* non-player gameobjs really shouldnt be jumping or flying around.*/
     Object->width = 32;
@@ -119,6 +129,7 @@ void initialize_block_gameobj(GameObject *Object, int x, int y, int Speed){
     OUTPUT:  - N/A
 *******************************************************************************/
 void initialize_platform_gameobj(GameObject *Object, int x, int y, int Speed){
+    int i;
     Object->collision = 2;
     Object->x = x;
     Object->y = y;
@@ -128,6 +139,10 @@ void initialize_platform_gameobj(GameObject *Object, int x, int y, int Speed){
     Object->height = 32;
     Object->eventflag = false;
     Object->respawn = false;
+    for(i = 0; i<2; i++){
+        Object->prev_x[i] = 0;
+        Object->prev_y[i] = 0;
+    }
     if(x <= 608 && x >= 0 && y <= 368 && y>=0 ){
         Object->render = true;
     }else{
@@ -147,11 +162,16 @@ void initialize_platform_gameobj(GameObject *Object, int x, int y, int Speed){
     OUTPUT:  - N/A
 *******************************************************************************/
 void initialize_goal_gameobj(GameObject *Object, int x, int y, int Speed){
+    int i;
     Object->collision = 3;
     Object->x = x;
     Object->y = y;
     Object->dx = Speed;
     Object->dy = 0; /* non-player gameobjs really shouldnt be jumping or flying around.*/
+    for(i = 0; i<2; i++){
+        Object->prev_x[i] = 0;
+        Object->prev_y[i] = 0;
+    }
     Object->width = 32;
     Object->height = 32;
     Object->eventflag = false;
@@ -173,11 +193,16 @@ void initialize_goal_gameobj(GameObject *Object, int x, int y, int Speed){
     OUTPUT:  - N/A
 *******************************************************************************/
 void initialize_player_gameobj(GameObject *Object, int x, int y, int Speed){
+    int i;
     Object->collision = 0;
     Object->x = x;
     Object->y = y;
     Object->dx = Speed;
     Object->dy = 0;
+    for(i = 0; i<2; i++){
+        Object->prev_x[i] = 0;
+        Object->prev_y[i] = 0;
+    }
     Object->width = 32;
     Object->height = 32;
     Object->eventflag = false;
@@ -229,27 +254,14 @@ bool platform_side_collision(Player *player, GameObject *plat){
     }
     return false;
 }
-bool platform_collision(Player *player, GameObject *object){
-    int px = player->entity.x;
-    int py = player->entity.y;
-    int pw = player->entity.width;
-    int ph = player->entity.height;
-    int ox = object->x;
-    int oy = object->y;
-    int oh = object->height;
-    int ow = object->width;
-    if( px < ox + ow &&        /* player’s left is left of object’s right*/
-        px + pw > ox &&        /* player’s right is right of object’s left*/
-        py < oy + oh &&        /* player’s top is above object’s bottom*/
-        py + ph > oy && player->alive == true){
-        if(py-player->entity.dy<oy+oh && py-player->entity.dy+ph>oy && player->alive == true){ /*I subtracted, make sure this math is actually right*/
-            player_death(player);
-            return true;
-        }
-    } 
-    return false;
-}
-
+/*******************************************************************************
+    PURPOSE: Detects collision between the player and a block
+             If a collision occurs while the player is alive, the player dies.
+    INPUT:   - player: pointer to the Player object
+             - object: pointer to the GameObject to check collision against
+             - count : size of the blocks array
+    OUTPUT:  - N/A (calls player_death if collision occurs)
+*******************************************************************************/
 bool handle_platform_collisions(Player *player, GameObject *blocks, int count){
     int i;
     player->on_platform = false;
@@ -268,7 +280,13 @@ bool handle_platform_collisions(Player *player, GameObject *blocks, int count){
     }
     return false;
 }
-
+/*******************************************************************************
+    PURPOSE: Detects if a player is standing on the top of a platform/block.
+             Helper function to the platform/block collision function.
+    INPUT:   - player: pointer to the Player object
+             - plat: pointer to the GameObject to check if theyre standing on it
+    OUTPUT:  - N/A (calls player_death if collision occurs)
+*******************************************************************************/
 bool platform_top_collision(Player *player, GameObject *plat){
     int px = player->entity.x;
     int py = player->entity.y;
@@ -445,9 +463,11 @@ void object_move(GameObject *object){
     object->x -= (object->dx);
     object->y -= (object->dy);
     if(object->x <= 0){
+        object->x = 0;
+        object->dx = 0;
         object->render = false;
         object->movestate = false;
-    }else if(object->x <= 608){
+    }else if(object->x <= 608 && object->x >= 0){
         object->render = true;
     }
 }
@@ -484,25 +504,7 @@ void fall(Player *player){
         player->on_ground = false;
     }
 }
-/*
-void fall(Player *player){
-    if(on_ground(player)&& player->entity.dy>=0){
-        player->entity.dy = 0;
-        player->entity.y = FLOOR;
-        player->on_ground = true;
-    } else {
-        player->entity.y += player->entity.dy;
-        player->entity.dy += GRAVITY;
-        player->on_ground = false;
-        if(on_ground(player)){
-            player->entity.dy = 0;
-            player->entity.y = FLOOR;
-            player->on_ground = true;
 
-        }
-    }
-}
-*/
 void player_on_floor(Player *player, int height){
     player->entity.y = height;
     player->entity.dy = 0;
