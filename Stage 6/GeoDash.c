@@ -44,7 +44,7 @@ int main() {
     unsigned long * base = (unsigned long*)Physbase();
     user_quit = false;
    
-
+    
     initialize_first_stage(&model);
     time_then = get_time();
     set_buffers(&back_buffer, &front_buffer, orig_buffer, allocated_buffer);
