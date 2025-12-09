@@ -38,7 +38,11 @@ typedef enum{
 
 
 
-/* stage 8 */
+/* stage 9 */
+#define ESC_SCANCODE    0x01
+#define KEY_1_SCANCODE  0x02
+#define KEY_2_SCANCODE  0x03
+#define SPACE_SCANCODE  57
 
 
 #endif
