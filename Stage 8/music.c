@@ -43,6 +43,7 @@ void start_music(){
     OUTPUT:  - N/A
 *******************************************************************************/
 void update_music(UINT32 time_elapsed){
+    note note;
     if(time_elapsed == 0 || melody_len == 0){
         return;
     }
@@ -53,16 +54,16 @@ void update_music(UINT32 time_elapsed){
         }else{
             time_elapsed-= ticks;
             state = (state+1)%melody_len;
-            const note *note = &melody[state];
-            if(note->tuning>0){
+            note = melody[state];
+            if(note.tuning>0){
                 set_volume(CH_A,off);
                 enable_channel(CH_A,off,off);
             }else{
-                set_tone(CH_A,note->tuning);
+                set_tone(CH_A,note.tuning);
                 set_volume(CH_A,10);
                 enable_channel(CH_A,on,off);
             }
-            ticks = note->length;
+            ticks = note.length;
         }
 
     }

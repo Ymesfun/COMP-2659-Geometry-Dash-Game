@@ -93,6 +93,7 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
     render_progress_bar(model, front_buffer);
     render_bitmap(model, front_buffer);
     plot_bitmap(front_buffer, 0, 335, ground_background, 640, 65);
+    start_music();
 
     
     time_then = get_time();
@@ -126,14 +127,15 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
                 set_video_base(front_buffer);
                 curr_front = true;
             }
-            
+            update_music(time_elapsed);
             Vsync();
 
         }
     }
-            if(!model->Player.alive){
-                play_death();
-            }
+    if(!model->Player.alive){
+        play_death();
+    }
+    stop_sound();
 }
 
 /*******************************************************************************

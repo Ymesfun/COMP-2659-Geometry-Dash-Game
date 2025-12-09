@@ -10,7 +10,7 @@
 *******************************************************************************/
 
 #include "psg.h"
-#include "osbind.h"
+#include <osbind.h>
 
 volatile char *PSG_reg_select = 0xFF8800;
 volatile char *PSG_reg_write  = 0xFF8802;
