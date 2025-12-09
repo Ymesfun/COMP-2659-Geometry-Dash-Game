@@ -153,16 +153,17 @@ PlayerState main_menu(UINT32 *base) {
     
     while (1) {
         ch = KBD_scancode_var;
-        
+        printf("%d",ch);
         if (ch == ESC) {
             return STATE_QUIT;
         } else if (ch == KEY_1) {
             /*clr_screen(base); */
             cleeeeer_screen(base);
 
-            
+            ch = 0;
             return STATE_IDLE;
         }
+        ch = 0;
     }
 }
 
