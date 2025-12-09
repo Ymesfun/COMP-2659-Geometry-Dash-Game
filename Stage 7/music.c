@@ -46,6 +46,7 @@ void update_music(UINT32 time_elapsed){
     if(time_elapsed == 0 || melody_len == 0){
         return;
     }
+    
     while(time_elapsed>0){
         if(ticks>time_elapsed){
             ticks-= time_elapsed;
