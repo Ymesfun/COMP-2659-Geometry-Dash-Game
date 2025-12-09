@@ -1,0 +1,9 @@
+input_test: input.o tst_in.o
+	cc68x -g input.o tst_in.o -o inputt
+
+tst_in.o: tst_in.c tst_in.h
+	cc68x -g -c tst_in.c 
+
+input.o: input.c input.h
+	cc68x -g -c input.c
+
