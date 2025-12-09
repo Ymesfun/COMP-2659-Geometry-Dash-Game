@@ -39,6 +39,7 @@ typedef enum{
 
 
 /* stage 8 */
-
+#define VIDEO_BASE_HI 0xFFFF8201
+#define VIDEO_BASE_MI 0xFFFF8203
 
 #endif

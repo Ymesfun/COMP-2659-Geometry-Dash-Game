@@ -46,7 +46,7 @@ UINT8 allocated_buffer[32260];
 int main() {
     Model model;
     UINT32 *back_buffer, *front_buffer;
-    UINT32* orig_buffer = Physbase();
+    UINT32* orig_buffer = (UINT32*)get_video_base();
     PlayerState current_state = STATE_START;
     
     set_buffers(&back_buffer, &front_buffer, orig_buffer, allocated_buffer);

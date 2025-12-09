@@ -13,7 +13,10 @@
 #include "raster.h"
 
 
-
+void asm_set_video_base(UINT32 *base);
+void asm_set_video_base(UINT32 *base){
+    
+}
 /*******************************************************************************
 	PURPOSE: Plotting a 16 bit bitmap given a base pointer by finding the remainder bit_shift by anding 
     every bit outside of the MSB, and getting the word_offset by dividing our x coord by 16 and bit 
@@ -144,7 +147,7 @@ void cleeeeer_screen(UINT32 *base) {
 *******************************************************************************/
 void screen_region_clear_16(int y, int x) {
     int i, offset;
-    UINT16 *base = ( UINT16 *)Physbase();
+    UINT16 *base = ( UINT16 *)get_video_base();
     int word_offset = (x >> 4) + ((y<<5)+(y<<3)); /* Word-aligned base offset */
     int bit_shift = y & 15; /* Offset within the 16-bit word */
     for (i = 0; i < SPRITE16_HEIGHT;  i++) {
@@ -199,7 +202,7 @@ void screen_region_clear_32(UINT32 *base, int y, int x) {
     end, and y pos to draw at. start/end/y are expected to be atari pixel values.
 *******************************************************************************/
 void drawline(int start, int end, int y) {
-    UINT16 *base = (UINT16 *)Physbase();
+    UINT16 *base = (UINT16 *)get_video_base();
     int offset = (y<<5) + (y<<3);  
     int i, word_index,bit_index;
     if (end <= start) return;
@@ -212,7 +215,7 @@ void drawline(int start, int end, int y) {
 
 void draw_splash_screen(unsigned long splash_screen[]) {
     int i;
-    unsigned long *base = (unsigned long *)Physbase();
+    unsigned long *base = (unsigned long *)get_video_base();
     
     /* Copy your splash screen */
     for (i = 0; i < 8000; i++) {
@@ -242,4 +245,26 @@ void update_progress_bar(Player *player, int goal_x_cord, UINT32 *base){
     if (progress_x > 0) {
         drawline(30, 30 + progress_x, 75);
     }
+}
+
+/*******************************************************************************
+	PURPOSE: Gets the value at VIDEO_BASE_HI and VIDEO_BASE_MI to find the start of our frame pointer.
+	INPUT: 	N/A
+	OUTPUT: UINT32 address
+*******************************************************************************/
+UINT32 get_video_base(){
+    volatile UINT8 hi, mi;
+    UINT32 address;
+    long old_ssp = Super(0);
+    hi = *(volatile UINT8*)VIDEO_BASE_HI; /*Grabs the two values at VIDEO_BASE_HI and MI*/
+    mi = *(volatile UINT8*)VIDEO_BASE_MI;
+    address = ((UINT32)hi << 16) | ((UINT32)mi << 8); /*Shifts them to get_vid_base address*/
+    Super(old_ssp);
+    return address;
+}
+
+void set_video_base(UINT32 *base){
+    long old_ssp = Super(0);
+    asm_set_video_base(base);
+    Super(old_ssp);
 }
