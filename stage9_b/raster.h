@@ -26,4 +26,6 @@ void draw_splash_screen(unsigned long splash_screen[]);
 
 void update_progress_bar(Player *player, int goal_x_cord, UINT32 *base);
 
+void plot_mouse_bitmap(unsigned long *base, int x, int y, const unsigned long *bitmap);
+
 #endif

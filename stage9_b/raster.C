@@ -85,6 +85,42 @@ void plot_bitmap_16(UINT16 *base, int x, int y, const UINT16 *bitmap) {
         }
     }
 
+
+/*******************************************************************************
+	PURPOSE: Plotting a 32 bit bitmap given a base pointer by finding the remainder bit_shift by anding 
+    every bit outside of the MSB, and getting the word_offset by dividing our x coord by 32 and bit 
+    shifting our y by multiplying it by 20. If we're on an aligned address, we just insert our bitmaps,
+    otherwise we align by shifting the bits on the first and second bit to align the bitmap in.
+
+	INPUT: 	- *base	pointer to the frame buffer
+			- x	x coordinate you'd like to plot the bitmap at
+			- y y coordinate you'd like to plot the bitmap at
+			- *bitmap pointer to the bitmap you'd like to plot
+			- height height of the bitmap you are plotting
+	OUTPUT: N/A
+    ASSUMPTIONS: The function does no bounds checking for the bitmap. Caller is expected to do bounds
+    checking on their end, for a 640x400 atari st screen. Obviously, this only supports 32 bit bitmaps 
+    as given by the name. All x/y coordinates are based on the atari ST screen's pixel size.
+*******************************************************************************/
+void plot_mouse_bitmap(unsigned long *base, int x, int y, const unsigned long *bitmap) {
+    int i;
+    int word_offset = (x >> 5) + ((y<<4)+(y<<2)); /* Word-aligned base offset */
+    int bit_shift = x & 31; /* Offset within the 32-bit word */
+
+    for (i = 0; i < SPRITE32_HEIGHT; i++) {
+    unsigned long *pixel_addr = base + word_offset + ((i<<4)+(i<<2));
+
+        if (bit_shift == 0) {
+            /* Perfectly aligned on a 16-bit boundary */
+            *pixel_addr ^= bitmap[i];
+        } else {
+            /* Bitmap is split across two 32-bit words */
+            pixel_addr[0] ^= bitmap[i] >> bit_shift; /* First part in current word */
+            pixel_addr[1] ^= bitmap[i] << (32 - bit_shift); /* Remaining part in next word */
+        }
+    }
+}
+
     void plot_bitmap(unsigned long *base, int x, int y, const unsigned long *bitmap, 
                  int width, int height) {
     int i;

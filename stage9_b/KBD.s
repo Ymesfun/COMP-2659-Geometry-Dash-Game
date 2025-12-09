@@ -33,9 +33,6 @@ MFP_ISRB      equ $FFFA11
 		xdef		_KBD_interrupt
 		xdef		_KBD_scancode_var
 		xdef		_mouse_buttons_var
-		xdef		_State_mouse_dx_var
-		xdef		_State_mouse_dy_var
-
 ;--------------------------------------------------------------------------
 
 
@@ -168,9 +165,11 @@ end_ISR:
 
 
 ;---------------------------------------------------------------------------
+
 _KBD_scancode_var:      ds.b 1  ;Lastt keyboard scancode (make/break code)
 _mouse_buttons_var:     ds.b 1  ; Mouse button state (bits 2-0: brl)
 _State_mouse_dx_var:    ds.b 1  ; Mouse X displacement 
 _State_mouse_dy_var:    ds.b 1  ; Mouse Y displacement 
 counter_byte:          ds.b 1  ; State machine counter (0, 1, or 2)
+
 ;---------------------------------------------------------------------------

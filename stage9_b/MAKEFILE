@@ -1,8 +1,11 @@
-geo_dash: raster.o events.o model.o render.o bitmaps.o GeoDash.o clr_qk.o VBL_ISR.o VBL.o m_splash.o kbd_ISR.o KBD.o Gosplash.o w_splash.o
-	cc68x -g raster.o events.o model.o render.o bitmaps.o GeoDash.o clr_qk.o VBL_ISR.o VBL.o m_splash.o kbd_ISR.o KBD.o Gosplash.o w_splash.o -o geo_dash
+geo_dash: raster.o mouse.o events.o model.o render.o bitmaps.o GeoDash.o clr_qk.o VBL_ISR.o VBL.o m_splash.o kbd_ISR.o KBD.o Gosplash.o w_splash.o
+	cc68x -g raster.o mouse.o events.o model.o render.o bitmaps.o GeoDash.o clr_qk.o VBL_ISR.o VBL.o m_splash.o kbd_ISR.o KBD.o Gosplash.o w_splash.o -o geo_dash
 
 GeoDash.o: GeoDash.c GeoDash.h	
 	cc68x -g -c GeoDash.c
+
+mouse.o: mouse.c mouse.h
+	cc68x -g -c mouse.c
 
 raster.o: raster.c raster.h
 	cc68x -g -c raster.c
