@@ -30,7 +30,13 @@ IKBD_STATUS   equ $FFFFFC00
 IKBD_DATA     equ $FFFFFC02
 MFP_ISRB      equ $FFFA11
 ;--------------------------------------------------------------------------
-        xdef _KBD_interrupt
+		xdef		_KBD_interrupt
+		xdef		_KBD_interrupt
+		xdef		_KBD_scancode_var
+		xdef		_mouse_buttons_var
+		xdef		_State_mouse_dx_var
+		xdef		_State_mouse_dy_var
+
 ;--------------------------------------------------------------------------
 
 

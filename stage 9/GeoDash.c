@@ -21,9 +21,15 @@
 #include "GeoDash.h"
 #include "kbd_ISR.h"
 
-#define ESC   0x1B
-#define KEY_1 0x31
-#define KEY_2 0x32
+#define ESC   0x01
+#define KEY_1 0x02
+#define KEY_2 0x03
+#define SPACE 0x39
+
+#define ESC_SCANCODE 0x01
+#define KEY_1_SCANCODE 0x02
+#define KEY_2_SCANCODE 0x03
+#define SPACE_SCANCODE 0x39
 
 /* Function prototypes */
 UINT32 get_time();
@@ -35,6 +41,7 @@ PlayerState play_again_menu(UINT32 *base);
 PlayerState menu_state_machine(PlayerState state, UINT32 *base, UINT32 *back_buffer);
 void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer);
 void reg_clear(Model *model, UINT32 *base);
+void KBD_interrupt();
 
 UINT8 allocated_buffer[32260];
 
@@ -103,7 +110,7 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
         ch = KBD_scancode_var;
         
         
-        if (ch == JUMP_KEY) {
+        if (ch == SPACE) {
             model->Player.jump_pressed = true;
         }
         
