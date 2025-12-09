@@ -3,9 +3,6 @@
 
 static void *old_ikbd_vector;
 
-/* External references to assembly variables */
-extern unsigned char KBD_scancode_var;
-extern unsigned char mouse_buttons_var;
 
 void install_ikbd_isr(void) {
     long old_ssp = Super(0);

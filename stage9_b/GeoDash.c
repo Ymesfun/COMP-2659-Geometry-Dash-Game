@@ -21,7 +21,7 @@
 #include "GeoDash.h"
 #include "kbd_ISR.h"
 #include "VBL_ISR.h"
-
+#include "mouse.h"
 
 
 
@@ -134,27 +134,30 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
 *******************************************************************************/
 PlayerState main_menu(UINT32 *base) {
     char ch;
-    char dxx;
-    char dyy;
+    int sel;
     
-
     draw_splash_screen(splash_mainmenu);
     
-    
     while (1) {
-    
-
+        /* Check for mouse input */
+        sel = MouseDriver(base);
+        
+        if (sel == 1) {
+            cleeeeer_screen(base);
+            return STATE_IDLE;
+        } else if (sel == 2) {
+            return STATE_QUIT;
+        }
+        
+        /* Check for keyboard input */
         ch = KBD_scancode_var;
         ch = KBD_scancode_var & 0x7F; /* Converts the full scan code with MAKE and BREAK to just make*/
         KBD_scancode_var = 0;
-
         
         if (ch == ESC_SCANCODE) {
             return STATE_QUIT;
         } else if (ch == KEY_1_SCANCODE) {
             cleeeeer_screen(base);
-
-            
             return STATE_IDLE;
         }
     }
