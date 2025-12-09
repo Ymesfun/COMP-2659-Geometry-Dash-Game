@@ -20,6 +20,9 @@
 #include "model.h"
 #include "GeoDash.h"
 #include "input.h"
+#include "effects.h"
+#include "music.h"
+#include "psg.h"
 
 #define ESC   0x1B
 #define KEY_1 0x31
@@ -70,7 +73,7 @@ int main() {
         }
     }
     
-    Setscreen(-1, orig_buffer, -1);
+    set_video_base(orig_buffer);
     return 0;
 }
 
@@ -90,6 +93,7 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
     render_progress_bar(model, front_buffer);
     render_bitmap(model, front_buffer);
     plot_bitmap(front_buffer, 0, 335, ground_background, 640, 65);
+    start_music();
 
     
     time_then = get_time();
@@ -100,6 +104,7 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
         
         if (ch == JUMP_KEY) {
             model->Player.jump_pressed = true;
+            play_jump();
         }
         
         time_now = get_time();
@@ -115,17 +120,22 @@ void run_game(Model *model, UINT32 *back_buffer, UINT32 *front_buffer) {
             
             if (curr_front == true) {
                 render(model, back_buffer);
-                Setscreen(-1, back_buffer, -1);
+                set_video_base(back_buffer);
                 curr_front = false;
             } else {
                 render(model, front_buffer);
-                Setscreen(-1, front_buffer, -1);
+                set_video_base(front_buffer);
                 curr_front = true;
             }
-            
+            update_music(time_elapsed);
             Vsync();
+
         }
     }
+    if(!model->Player.alive){
+        play_death();
+    }
+    stop_sound();
 }
 
 /*******************************************************************************
@@ -136,7 +146,7 @@ PlayerState main_menu(UINT32 *base) {
     int ch;
     
     
-    draw_splash_screen(splash_mainmenu);
+    draw_splash_screen(splash_mainmenu, base);
     Vsync();
     
     while (1) {
@@ -162,7 +172,7 @@ PlayerState winner_menu(UINT32 *base) {
     int ch;
     
 
-    draw_splash_screen(splash_winner);
+    draw_splash_screen(splash_winner, base);
     Vsync();
     
     while (1) {
@@ -185,7 +195,7 @@ PlayerState play_again_menu(UINT32 *base) {
     
     /*clr_screen(base); */
     cleeeeer_screen(base);
-    draw_splash_screen(splash_gameover);
+    draw_splash_screen(splash_gameover, base);
     Vsync();
     
     while (1) {
@@ -273,7 +283,7 @@ void initialize_first_stage(Model *model) {
     model->Platformcount = 1;
    
     initialize_player_obj(&model->Player, 50, FLOOR, 0);
-    initialize_goal_gameobj(&model->Goal, 1000, FLOOR, 7);
+    initialize_goal_gameobj(&model->Goal, 2500, FLOOR, 7);
     
     
     for (i = 0; i < model->Spikecount; i++) {
@@ -302,7 +312,7 @@ void initialize_first_stage(Model *model) {
 
     
     for (i = 0; i < model->Platformcount; i++) {
-        x = 570 + i * 180;
+        x = 270 + i * 180;
         y = 300;
         initialize_platform_gameobj(&model->platforms[i], x, y, 7);
     }

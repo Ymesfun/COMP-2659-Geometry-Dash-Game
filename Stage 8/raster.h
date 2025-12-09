@@ -18,11 +18,11 @@ void screen_region_clear_16(int y, int x);
 
 void screen_region_clear_32(UINT32 *base, int y, int x);
 
-void drawline(int start, int end, int y);
+void drawline(int start, int end, int y, UINT16 *base);
 
 void plot_bitmap(unsigned long *base, int x, int y, const unsigned long *bitmap, int width, int height);
 
-void draw_splash_screen(unsigned long splash_screen[]);
+void draw_splash_screen(unsigned long splash_screen[],UINT32 *base);
 
 void update_progress_bar(Player *player, int goal_x_cord, UINT32 *base);
 

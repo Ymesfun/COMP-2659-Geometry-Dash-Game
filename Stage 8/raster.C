@@ -13,10 +13,9 @@
 #include "raster.h"
 
 
-void asm_set_video_base(UINT32 *base);
-void asm_set_video_base(UINT32 *base){
-    
-}
+void set_video_base_asm(UINT32 *base);
+
+
 /*******************************************************************************
 	PURPOSE: Plotting a 16 bit bitmap given a base pointer by finding the remainder bit_shift by anding 
     every bit outside of the MSB, and getting the word_offset by dividing our x coord by 16 and bit 
@@ -201,8 +200,7 @@ void screen_region_clear_32(UINT32 *base, int y, int x) {
     checking on their end, for a 640x400 atari st screen. This only draws a vertical line given a start,
     end, and y pos to draw at. start/end/y are expected to be atari pixel values.
 *******************************************************************************/
-void drawline(int start, int end, int y) {
-    UINT16 *base = (UINT16 *)get_video_base();
+void drawline(int start, int end, int y, UINT16 *base) {
     int offset = (y<<5) + (y<<3);  
     int i, word_index,bit_index;
     if (end <= start) return;
@@ -213,10 +211,8 @@ void drawline(int start, int end, int y) {
     }
 }
 
-void draw_splash_screen(unsigned long splash_screen[]) {
-    int i;
-    unsigned long *base = (unsigned long *)get_video_base();
-    
+void draw_splash_screen(unsigned long splash_screen[], UINT32 *base) {
+    int i;    
     /* Copy your splash screen */
     for (i = 0; i < 8000; i++) {
         base[i] = splash_screen[i];
@@ -243,7 +239,7 @@ void update_progress_bar(Player *player, int goal_x_cord, UINT32 *base){
     }
     
     if (progress_x > 0) {
-        drawline(30, 30 + progress_x, 75);
+        drawline(30, 30 + progress_x, 75, (UINT16 *)base);
     }
 }
 
@@ -265,6 +261,7 @@ UINT32 get_video_base(){
 
 void set_video_base(UINT32 *base){
     long old_ssp = Super(0);
-    asm_set_video_base(base);
+    set_video_base_asm(base);
     Super(old_ssp);
 }
+
