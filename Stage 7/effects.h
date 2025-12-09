@@ -7,10 +7,10 @@
 #define HIT_SOUND 4000
 #define EFFECTS_TONE 200
 
-play_death();
+void play_death();
 
-play_jump();
+void play_jump();
 
-play_goal();
+void play_goal();
 
 #endif

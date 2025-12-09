@@ -93,10 +93,7 @@ void set_volume(int channel, int volume){
     OUTPUT:  - N/A
 *******************************************************************************/
 void enable_channel(int channel, int tone_on, int noise_on){
-    if(tone_on !=0 || tone_on !=1 || noise_on != 0 || tone_on !=1){
-        return;
-    } 
-    if(channel >= 0 && channel <3 ){
+    if(channel >= 0 && channel <3 && tone_on<2 && tone_on >=0 && noise_on <2 && noise_on >=0){
         UINT8 low_order;
         UINT8 high_order;
         UINT8 mix = read_psg(MIXER);
