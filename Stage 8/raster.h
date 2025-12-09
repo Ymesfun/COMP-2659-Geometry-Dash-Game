@@ -26,4 +26,8 @@ void draw_splash_screen(unsigned long splash_screen[]);
 
 void update_progress_bar(Player *player, int goal_x_cord, UINT32 *base);
 
+UINT32 get_video_base();
+
+void set_video_base(UINT32 *base);
+
 #endif
