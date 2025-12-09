@@ -14,7 +14,6 @@
 #include "events.h"
 #include "model.h"
 
-
 /*******************************************************************************
     PURPOSE: Moves the game world (Model, to be specific) by one tick/instance when called.
     INPUT:   - Model: memory address of the Mode holding the game world/elements
@@ -23,6 +22,7 @@
 void update_game_model(Model *Model) { 
     Player *player = &Model->Player;
     int i;
+	bool hold = false;
 
     if (handle_platform_collisions(player, Model->Blocks, Model->Blockcount)) {
         if (!player->alive) return; 
@@ -33,6 +33,12 @@ void update_game_model(Model *Model) {
             player_death(player);
             return;
         }   
+    }
+    for (i = 0; i<Model->Platformcount; i++){
+        hold = platform_top_collision(player, &Model->platforms[i]);
+        if(hold){
+            break;
+        }
     }
     for (i = 0; i < Model->crystalcount; i++) {
         if (object_collisioncheck(player, &Model->crystalspike[i])) {

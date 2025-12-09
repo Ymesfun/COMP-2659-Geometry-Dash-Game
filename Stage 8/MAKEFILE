@@ -1,9 +1,18 @@
-geo_dash: raster.o events.o model.o render.o bitmaps.o input.o GeoDash.o clr_qk.o m_splash.o Gosplash.o w_splash.o
-	cc68x -g raster.o events.o model.o render.o bitmaps.o input.o GeoDash.o clr_qk.o m_splash.o Gosplash.o w_splash.o -o geo_dash
+geo_dash: raster.o events.o effects.o psg.o music.o model.o render.o bitmaps.o input.o GeoDash.o rastasm.o clr_qk.o m_splash.o Gosplash.o w_splash.o
+	cc68x -g raster.o events.o model.o effects.o psg.o music.o render.o bitmaps.o input.o GeoDash.o rastasm.o clr_qk.o m_splash.o Gosplash.o w_splash.o -o geo_dash
 
 GeoDash.o: GeoDash.c GeoDash.h	
 	cc68x -g -c GeoDash.c
+music.o: music.c music.h
+	cc68x -g -c music.c
 
+psg.o: psg.c psg.h
+	cc68x -g -c psg.c
+
+
+effects.o: effects.c effects.h
+	cc68x -g -c effects.c
+	
 input.o: input.c input.h
 	cc68x -g -c input.c
 
@@ -36,6 +45,9 @@ w_splash.o: w_splash.c w_splash.h
 
 clr_qk.o: clr_qk.s
 	gen -L2 -D clr_qk.s
+
+rastasm.o: rastasm.s
+	gen -L2 -D rastasm.s
 
 clean:
 	$(RM) *.o

@@ -14,8 +14,6 @@ static int state = 0; /*Using state design seems best for this.*/
 static int ground = 0; /*Draw the ground twice*/
 
 
-void draw_splash_screen(unsigned long splash_screen[]);
-
 
 /*******************************************************************************
     PURPOSE: Main clear function that clears both buffers. A bit too aggressive,
@@ -81,9 +79,10 @@ void reg_clear(Model *model, UINT32 *base){
         if(prev_bounded(model->Goal.prev_x[state],model->Goal.prev_y[state])){
             screen_region_clear_32(base, model->Goal.prev_y[state], model->Goal.prev_x[state]);
         }
+        model->Goal.prev_x[state] = model->Goal.x;
+        model->Goal.prev_y[state] = model->Goal.y;
     }
-    model->Goal.prev_x[state] = model->Goal.x;
-    model->Goal.prev_y[state] = model->Goal.y;
+
     state = (state+1)&1; /*Instead of (state+1)%2, we can just and to find if were at index 0/1*/
 }
 
@@ -104,6 +103,9 @@ void render(Model *model, UINT32 *base){
     render_hanging_spike(model, base);
     render_crystal_spike(model, base); 
     render_platform(model, base);
+    if(model->Goal.render){
+        render_goal(&model->Goal, base);
+    }
     update_progress_bar(&model->Player, model->Goal.x, base);
     render_mouse1(model, base);
     render_mouse2(model, base);
@@ -168,7 +170,7 @@ void render_platform(Model *model, UINT32*base){
     for(i = 0; i<model->Platformcount; i++){
         /*read above in render_all_spikes*/
             if(model->platforms[i].render){
-            plot_bitmap_32(base, model->platforms[i].x, model->platforms[i].y, platform_bitmap);
+                plot_bitmap_32(base, model->platforms[i].x, model->platforms[i].y, platform_bitmap);
             } 
         }
     }
